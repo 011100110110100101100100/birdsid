@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Bird Species Identifier</title>
+    <meta charset="UTF-8">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #e6f2ff;
+            text-align: center;
+            padding: 30px;
+        }
+        #result {
+            margin-top: 20px;
+            font-size: 1.2em;
+            font-weight: bold;
+            color: #333;
+        }
+        img {
+            max-width: 300px;
+            margin-top: 20px;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.2);
+        }
+        button {
+            padding: 10px 20px;
+            font-size: 1em;
+            background-color: #3399ff;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #287acc;
+        }
+    </style>
+</head>
+<body>
+    <h1>Bird Species Identification</h1>
+    <form id="upload-form" enctype="multipart/form-data">
+        <input type="file" id="imageInput" name="image" accept="image/*" required><br><br>
+        <button type="submit">Identify Bird</button>
+    </form>
+    <div id="result"></div>
+    <img id="uploadedImage" src="#" alt="Uploaded Image" style="display:none;">
+
+    <script>
+        const form = document.getElementById('upload-form');
+        const result = document.getElementById('result');
+        const uploadedImage = document.getElementById('uploadedImage');
+
+        form.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const file = document.getElementById('imageInput').files[0];
+            if (!file) return;
+            const formData = new FormData();
+            formData.append('image', file);
+
+            uploadedImage.src = URL.createObjectURL(file);
+            uploadedImage.style.display = 'block';
+            result.innerHTML = 'Identifying...';
+
+            const response = await fetch('/identify', {
+                method: 'POST',
+                body: formData
+            });
+
+            if (!response.ok) {
+                result.innerHTML = 'Failed to identify species.';
+                return;
+            }
+
+            const data = await response.json();
+            result.innerHTML = `Species: ${data.species}`;
+        });
+    </script>
+</body>
+</html>
