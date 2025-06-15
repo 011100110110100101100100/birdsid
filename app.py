@@ -6,15 +6,14 @@ import json
 
 app = Flask(__name__)
 
-# Load MobileNetV2 instead of ResNet18 (less memory usage)
+# Load model
 model = models.mobilenet_v2(pretrained=True)
 model.eval()
 
-# Dummy labels — replace with real ImageNet labels if you want
+# Load labels
 with open("imagenet_labels.json") as f:
     idx_to_label = json.load(f)
 
-# Define transform for image
 transform = transforms.Compose([
     transforms.Resize((224, 224)),
     transforms.ToTensor(),
@@ -32,7 +31,10 @@ def index():
 
                 with torch.no_grad():
                     outputs = model(image)
+                    print("Raw outputs:", outputs)
                     _, predicted = outputs.max(1)
+                    print("Predicted index:", predicted.item())
+                    # Use int key lookup if labels use int keys
                     label = idx_to_label.get(str(predicted.item()), "Unknown")
 
         except Exception as e:
@@ -40,4 +42,4 @@ def index():
     return render_template("index.html", label=label)
 
 if __name__ == "__main__":
-    app.run()
+    app.run(debug=True)
